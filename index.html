@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>実務選考テスト | 海外総代理店チーム</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --ink:#1a1814;--ink-mid:#4a4640;--ink-light:#8a8680;--ink-faint:#e2ddd6;
+  --paper:#f7f4ee;--paper-white:#fffefb;--paper-mid:#eeebe3;
+  --accent:#c84b2f;--accent-bg:#fdf0eb;
+  --col1:#3d3472;--col1-bg:#eeecfd;--col1-border:#c8c3ef;
+  --col2:#1a6650;--col2-bg:#e3f5ee;--col2-border:#9fd4be;
+  --ai:#1458a0;--ai-bg:#e8f2fc;--ai-border:#a8c8ee;
+  --warn:#8a3020;--warn-bg:#fdeee9;--warn-border:#f0b8a8;
+  --font-serif:'Noto Serif JP',serif;
+  --font-sans:'Noto Sans JP',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-sans);background:var(--paper);color:var(--ink);font-weight:300;line-height:1.8;overflow-x:hidden;font-size:15px;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 3rem;display:flex;align-items:center;justify-content:space-between;background:rgba(247,244,238,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--ink-faint);}
+.nav-logo{font-family:var(--font-mono);font-size:11px;letter-spacing:0.14em;color:var(--accent);text-transform:uppercase;font-weight:500;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{font-size:13px;font-weight:400;color:var(--ink-mid);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover{color:var(--accent);}
+
+/* HERO */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;padding-top:68px;}
+.hero-left{padding:7rem 3.5rem 5rem 5rem;display:flex;flex-direction:column;justify-content:center;gap:1.5rem;}
+.hero-label{font-family:var(--font-mono);font-size:11px;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;display:flex;align-items:center;gap:10px;animation:fadeUp 0.6s ease 0.1s both;}
+.hero-label::before{content:'';display:block;width:28px;height:1.5px;background:var(--accent);}
+.hero-title{font-family:var(--font-serif);font-size:clamp(2rem,3.2vw,3rem);font-weight:300;line-height:1.4;color:var(--ink);animation:fadeUp 0.6s ease 0.2s both;}
+.hero-title em{font-style:normal;color:var(--accent);}
+.hero-title span{display:block;font-size:clamp(1rem,1.5vw,1.3rem);color:var(--ink-mid);margin-top:0.5rem;font-weight:300;}
+.hero-sub{font-size:14px;color:var(--ink-mid);line-height:2;max-width:460px;animation:fadeUp 0.6s ease 0.3s both;}
+.hero-enjoy{background:var(--paper-mid);border-left:3px solid var(--accent);padding:1rem 1.25rem;border-radius:0 6px 6px 0;animation:fadeUp 0.6s ease 0.35s both;}
+.hero-enjoy-text{font-size:13.5px;color:var(--ink);line-height:1.9;}
+.hero-enjoy-text strong{font-weight:500;color:var(--accent);}
+.ai-banner{display:flex;align-items:flex-start;gap:12px;background:var(--ai-bg);border:1px solid var(--ai-border);border-radius:8px;padding:1rem 1.25rem;animation:fadeUp 0.6s ease 0.4s both;}
+.ai-icon{font-family:var(--font-mono);font-size:11px;font-weight:500;color:var(--ai);background:#c8ddf8;padding:3px 7px;border-radius:4px;flex-shrink:0;margin-top:2px;}
+.ai-text{font-size:13px;color:#0a3d7a;line-height:1.8;}
+.ai-text strong{font-weight:500;}
+.hero-meta{display:flex;gap:2rem;flex-wrap:wrap;animation:fadeUp 0.6s ease 0.5s both;}
+.meta-item{display:flex;flex-direction:column;gap:3px;}
+.meta-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;color:var(--ink-light);text-transform:uppercase;}
+.meta-val{font-size:13px;font-weight:500;color:var(--ink);}
+
+.hero-right{background:var(--ink);display:flex;align-items:center;justify-content:center;padding:5rem 3.5rem;position:relative;overflow:hidden;}
+.hero-right::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 47px,rgba(255,255,255,0.025) 47px,rgba(255,255,255,0.025) 48px);}
+.hero-card{position:relative;z-index:1;max-width:380px;width:100%;animation:fadeUp 0.6s ease 0.4s both;}
+.hc-title{font-family:var(--font-serif);font-size:14px;font-weight:300;color:rgba(255,255,255,0.55);margin-bottom:1.5rem;letter-spacing:0.05em;}
+.flow-item{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.06);align-items:flex-start;}
+.flow-item:last-child{border-bottom:none;}
+.flow-badge{font-family:var(--font-mono);font-size:10px;font-weight:500;padding:3px 8px;border-radius:3px;flex-shrink:0;margin-top:2px;}
+.flow-content{}
+.flow-main{font-size:14px;font-weight:500;color:rgba(255,255,255,0.92);line-height:1.5;}
+.flow-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-top:3px;line-height:1.6;}
+
+/* SECTIONS */
+.section-wrap{padding:5rem 5rem;}
+.section-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;color:var(--ink-light);text-transform:uppercase;display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;}
+.section-label::before{content:'';display:block;width:20px;height:1px;background:var(--ink-light);}
+.section-title{font-family:var(--font-serif);font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:300;line-height:1.4;margin-bottom:0.75rem;}
+.section-lead{font-size:14px;color:var(--ink-mid);line-height:2;max-width:640px;margin-bottom:3rem;}
+
+/* TEST BLOCKS */
+.test-wrap{display:flex;flex-direction:column;gap:3rem;}
+.test-card{background:var(--paper-white);border:1.5px solid var(--ink-faint);border-radius:12px;overflow:hidden;}
+.test-header{padding:1.5rem 2rem;display:flex;align-items:center;gap:14px;border-bottom:1.5px solid var(--ink-faint);}
+.test-badge{font-size:12px;font-weight:700;padding:5px 14px;border-radius:20px;letter-spacing:0.05em;}
+.test-header-text{}
+.test-header-title{font-family:var(--font-serif);font-size:1.2rem;font-weight:400;color:var(--ink);line-height:1.3;}
+.test-header-sub{font-size:12px;color:var(--ink-light);margin-top:3px;}
+
+.test-content{display:grid;grid-template-columns:300px 1fr;}
+.test-side{padding:2rem;border-right:1.5px solid var(--ink-faint);display:flex;flex-direction:column;gap:1.25rem;background:var(--paper);}
+.test-main{padding:2rem 2.5rem;}
+
+/* SIDE BOXES */
+.side-box{border-radius:8px;padding:1rem 1.1rem;}
+.side-box-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;font-weight:500;}
+.side-item{font-size:12.5px;line-height:2;display:flex;gap:8px;align-items:flex-start;}
+.side-item::before{content:'—';flex-shrink:0;opacity:0.5;}
+.side-item a{text-decoration:none;transition:opacity 0.15s;}
+.side-item a:hover{opacity:0.7;text-decoration:underline;}
+
+.box-rule{background:var(--warn-bg);border:1px solid var(--warn-border);}
+.box-rule .side-box-label{color:var(--warn);}
+.box-rule .side-item{color:var(--warn);}
+
+.box-sites{background:var(--paper-white);border:1px solid var(--ink-faint);}
+.box-sites .side-box-label{color:var(--ink-light);}
+.box-site-category{font-size:11px;font-weight:700;color:var(--ink-mid);margin:10px 0 4px;letter-spacing:0.05em;}
+.box-site-category:first-of-type{margin-top:4px;}
+
+.box-framework{background:var(--paper-white);border:1px solid var(--ink-faint);}
+.box-framework .side-box-label{color:var(--ink-light);}
+.box-framework .side-item{color:var(--ink-mid);}
+
+.box-ai{background:var(--ai-bg);border:1px solid var(--ai-border);}
+.box-ai .side-box-label{color:var(--ai);}
+.box-ai .side-item{color:#0a3d7a;}
+
+/* EVAL NOTICE — Test 2 specific */
+.eval-notice{background:#fffbf0;border:2px solid #e8c84a;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1.5rem;}
+.eval-notice-title{font-size:13px;font-weight:700;color:#7a5800;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.eval-notice-title::before{content:'★';font-size:12px;}
+.eval-notice-body{font-size:13px;color:#5a4200;line-height:1.9;}
+.eval-notice-body strong{font-weight:700;}
+
+.eval-focus{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+.eval-focus-item{background:#fff8e0;border-radius:6px;padding:10px 12px;border:1px solid #e8c84a;}
+.eval-focus-label{font-size:11px;color:#7a5800;font-weight:500;margin-bottom:3px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.08em;}
+.eval-focus-text{font-size:12.5px;color:#5a4200;line-height:1.7;}
+
+.box-cond{background:var(--paper-white);border:1px solid var(--ink-faint);}
+.box-cond .side-box-label{color:var(--ink-light);}
+.box-cond .side-item{color:var(--ink-mid);}
+
+/* QUESTIONS */
+.q-list{display:flex;flex-direction:column;}
+.q-item{display:grid;grid-template-columns:56px 1fr;gap:0;padding:1.25rem 0;border-bottom:1px solid var(--ink-faint);}
+.q-item:last-child{border-bottom:none;}
+.q-num{font-family:var(--font-mono);font-size:12px;font-weight:500;color:var(--ink-light);padding-top:2px;}
+.q-body{}
+.q-text{font-size:14px;color:var(--ink);line-height:1.8;}
+.q-hint{font-size:12px;color:var(--ink-light);margin-top:5px;line-height:1.6;display:flex;gap:6px;align-items:flex-start;}
+.q-hint::before{content:'→';flex-shrink:0;}
+
+/* TAGS */
+.tag-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:1rem;}
+.tag{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--paper-mid);color:var(--ink-mid);border:1px solid var(--ink-faint);font-weight:400;}
+
+/* EVAL SECTION */
+.eval-section{background:var(--ink);padding:5rem;}
+.eval-section .section-label{color:rgba(255,255,255,0.3);}
+.eval-section .section-label::before{background:rgba(255,255,255,0.3);}
+.eval-section .section-title{color:rgba(255,255,255,0.92);}
+.eval-section .section-lead{color:rgba(255,255,255,0.45);}
+.eval-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:2rem;}
+.eval-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1.5rem 1.25rem;}
+.eval-num{font-family:var(--font-mono);font-size:22px;color:rgba(255,255,255,0.1);margin-bottom:1rem;font-weight:500;}
+.eval-name{font-family:var(--font-serif);font-size:14px;font-weight:400;color:rgba(255,255,255,0.88);margin-bottom:0.5rem;}
+.eval-desc{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.8;}
+
+/* CTA */
+.cta{background:var(--accent-bg);padding:6rem 5rem;text-align:center;display:flex;flex-direction:column;align-items:center;gap:1.25rem;}
+.cta-label{font-family:var(--font-mono);font-size:10px;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;}
+.cta-title{font-family:var(--font-serif);font-size:clamp(1.6rem,2.5vw,2.4rem);font-weight:300;color:var(--ink);line-height:1.4;max-width:560px;}
+.cta-sub{font-size:13.5px;color:var(--ink-mid);line-height:2;max-width:500px;}
+.cta-btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);font-family:var(--font-mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;text-decoration:none;padding:1rem 2.5rem;border-radius:2px;transition:background 0.2s,transform 0.15s;margin-top:0.5rem;}
+.cta-btn:hover{background:var(--accent);transform:translateY(-2px);}
+
+footer{background:var(--ink);padding:2rem 5rem;display:flex;align-items:center;justify-content:space-between;}
+.footer-l{font-family:var(--font-mono);font-size:11px;letter-spacing:0.1em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
+.footer-r{font-size:11px;color:rgba(255,255,255,0.18);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 0.55s ease,transform 0.55s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:960px){
+  nav{padding:1rem 1.5rem;}
+  .nav-links{display:none;}
+  .hero{grid-template-columns:1fr;}
+  .hero-left{padding:5rem 2rem 2.5rem;}
+  .hero-right{padding:2.5rem 2rem;min-height:300px;}
+  .section-wrap,.eval-section,.cta{padding:3.5rem 1.5rem;}
+  .test-content{grid-template-columns:1fr;}
+  .test-side{border-right:none;border-bottom:1.5px solid var(--ink-faint);}
+  .eval-cards{grid-template-columns:1fr 1fr;}
+  footer{padding:1.5rem;flex-direction:column;gap:0.5rem;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">実務選考テスト 2026</div>
+  <ul class="nav-links">
+    <li><a href="#tests">課題内容</a></li>
+    <li><a href="#eval">評価基準</a></li>
+    <li><a href="#apply">提出</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-left">
+    <div class="hero-label">実務選考テスト — Practical Selection</div>
+    <h1 class="hero-title">
+      思考して、作る。<br>
+      <em>AIをフル活用</em>して、<br>
+      実務レベルで挑んでほしい。
+      <span>正解はない。どう考え、どう形にするかを見ます。</span>
+    </h1>
+    <p class="hero-sub">マーケティングの思考力と、動画制作の実行力を2つの課題で測ります。難しく考えすぎず、楽しみながら取り組んでください。</p>
+    <div class="hero-enjoy">
+      <p class="hero-enjoy-text">
+        <strong>思考と実務を、楽しんでほしい。</strong><br>
+        これはテストですが、実際の業務と同じプロセスです。リサーチして、考えて、手を動かす。その過程を存分に楽しんでください。
+      </p>
+    </div>
+    <div class="ai-banner">
+      <span class="ai-icon">AI</span>
+      <div class="ai-text">
+        <strong>AIは積極的に使ってください。</strong><br>
+        ChatGPT・Claude・Geminiなど何でもOK。大切なのはAIを使いこなして質の高いアウトプットを出せるかどうかです。
+      </div>
+    </div>
+    <div class="hero-meta">
+      <div class="meta-item"><span class="meta-label">提出形式</span><span class="meta-val">Googleスプレッドシート</span></div>
+      <div class="meta-item"><span class="meta-label">制限時間</span><span class="meta-val">なし（持ち帰り）</span></div>
+      <div class="meta-item"><span class="meta-label">課題数</span><span class="meta-val">全 2 課題</span></div>
+      <div class="meta-item"><span class="meta-label">設問数</span><span class="meta-val">全 8 問</span></div>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-card">
+      <div class="hc-title">全体の流れ</div>
+      <div class="flow-item">
+        <span class="flow-badge" style="background:#3d3472;color:#ccc9f8;">Test ①</span>
+        <div class="flow-content">
+          <div class="flow-main">海外商品の発見 → 市場分析 → N1 → 販売戦略</div>
+          <div class="flow-sub">マーケティング思考プロセス・分析力</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <span class="flow-badge" style="background:#1a6650;color:#b0e8d0;">Test ②</span>
+        <div class="flow-content">
+          <div class="flow-main">自分の購入商品 → 分析 → 動画制作</div>
+          <div class="flow-sub">台本構成力・マーケ視点の撮影表現力</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TESTS -->
+<div class="section-wrap" id="tests">
+  <div class="section-label">Test Contents</div>
+  <h2 class="section-title">課題内容</h2>
+  <p class="section-lead reveal">2つの課題はそれぞれ独立しています。順番通りに取り組んでください。</p>
+
+  <div class="test-wrap">
+
+    <!-- TEST 1 -->
+    <div class="test-card reveal">
+      <div class="test-header">
+        <span class="test-badge" style="background:var(--col1-bg);color:var(--col1);">Test ①</span>
+        <div class="test-header-text">
+          <div class="test-header-title">海外商品の発見 → 市場分析 → N1リサーチ → 販売戦略</div>
+          <div class="test-header-sub">マーケティング思考プロセス・分析力を測る</div>
+        </div>
+      </div>
+      <div class="test-content">
+        <div class="test-side">
+          <div class="tag-row">
+            <span class="tag">海外商品リサーチ</span>
+            <span class="tag">市場分析</span>
+            <span class="tag">競合優位性</span>
+            <span class="tag">N1策定</span>
+            <span class="tag">媒体設計</span>
+          </div>
+
+          <div class="side-box box-rule">
+            <div class="side-box-label">必須ルール</div>
+            <div class="side-item" style="font-weight:500;">日本未発売・海外では販売中の商品に限る</div>
+            <div class="side-item">商品の購入は不要</div>
+            <div class="side-item">完全リモート・出社不要</div>
+          </div>
+
+          <div class="side-box box-sites">
+            <div class="side-box-label">参考リサーチサイト 23選</div>
+
+            <div class="box-site-category">海外クラウドファンディング</div>
+            <div class="side-item"><a href="https://www.kickstarter.com/" style="color:var(--ai);">Kickstarter</a>（米）世界最大・審査厳しめ</div>
+            <div class="side-item"><a href="https://www.indiegogo.com/" style="color:var(--ai);">Indiegogo</a>（米）審査緩め</div>
+            <div class="side-item"><a href="https://www.wadiz.kr/home" style="color:var(--ai);">WADIZ</a>（韓）韓国最大手</div>
+            <div class="side-item"><a href="https://www.flyingv.cc/" style="color:var(--ai);">Flying V</a>（台）台湾No.1</div>
+            <div class="side-item"><a href="https://www.zeczec.com/" style="color:var(--ai);">ZECZEC</a>（台）台湾知名度高</div>
+            <div class="side-item"><a href="https://izhongchou.taobao.com/" style="color:var(--ai);">造点新貨</a>（中）タオバオ系</div>
+            <div class="side-item"><a href="https://searchingc.com/" style="color:var(--ai);">SERCHING</a> クラファン横断検索</div>
+
+            <div class="box-site-category">デザインアワード</div>
+            <div class="side-item"><a href="https://www.red-dot.org/" style="color:var(--ai);">Red Dot Design Award</a>（独）</div>
+            <div class="side-item"><a href="https://ifdesign.com/en/" style="color:var(--ai);">iF Design Award</a>（独）</div>
+            <div class="side-item"><a href="https://www.idsa.org/awards-recognitions/idea/idea-gallery/" style="color:var(--ai);">IDEA</a>（米）</div>
+            <div class="side-item"><a href="https://www.chi-athenaeum.org/" style="color:var(--ai);">Good Design</a>（米）</div>
+            <div class="side-item"><a href="https://competition.adesignaward.com/winners.php" style="color:var(--ai);">A' Design Award</a>（伊）</div>
+
+            <div class="box-site-category">展示会</div>
+            <div class="side-item"><a href="https://www.jetro.go.jp/j-messe/" style="color:var(--ai);">JETRO</a> 展示会情報収集</div>
+            <div class="side-item"><a href="https://www.ces.tech/" style="color:var(--ai);">CES</a>（米）クラファン上位メーカー多数</div>
+            <div class="side-item"><a href="https://www.cantonfair.org.cn/en-US" style="color:var(--ai);">広州交易会</a>（中）大規模製品展示会</div>
+            <div class="side-item"><a href="https://megashow.comasia.net.cn/" style="color:var(--ai);">MEGA SHOW</a>（香港）アジア最大級</div>
+
+            <div class="box-site-category">海外 Amazon</div>
+            <div class="side-item"><a href="https://www.amazon.com/" style="color:var(--ai);">Amazon.com</a>（米）</div>
+            <div class="side-item"><a href="https://www.amazon.co.uk/" style="color:var(--ai);">Amazon.co.uk</a>（英）</div>
+            <div class="side-item"><a href="https://www.amazon.de/" style="color:var(--ai);">Amazon.de</a>（独）</div>
+
+            <div class="box-site-category">ファンディングサイト</div>
+            <div class="side-item"><a href="https://wefunder.com/" style="color:var(--ai);">WeFunder</a>（米）</div>
+            <div class="side-item"><a href="https://www.startengine.com/" style="color:var(--ai);">StartEngine</a>（米）</div>
+            <div class="side-item"><a href="https://republic.com/" style="color:var(--ai);">Republic</a>（米）</div>
+            <div class="side-item"><a href="https://netcapital.com/" style="color:var(--ai);">Netcapital</a>（米）</div>
+          </div>
+
+          <div class="side-box box-framework">
+            <div class="side-box-label">分析フレームワーク（参考）</div>
+            <div class="side-item">TAM — カテゴリ全体の市場規模</div>
+            <div class="side-item">SAM — アプローチできる市場</div>
+            <div class="side-item">SOM — 現実的な獲得シェア</div>
+            <div class="side-item">市場成長率 (YoY)</div>
+            <div class="side-item">競合ポジション・強み弱み比較</div>
+            <div class="side-item">参入障壁（規制・物流・言語）</div>
+          </div>
+
+          <div class="side-box box-ai">
+            <div class="side-box-label">AI 活用OK</div>
+            <div class="side-item">市場調査・TAM/SAM/SOM試算</div>
+            <div class="side-item">競合分析・N1の肉付け</div>
+            <div class="side-item">媒体選定の整理など自由に活用</div>
+          </div>
+        </div>
+
+        <div class="test-main">
+          <div class="q-list">
+            <div class="q-item">
+              <span class="q-num">Q 01</span>
+              <div class="q-body">
+                <div class="q-text">上記リサーチサイトを参考に「日本未発売・海外では販売中の商品」を1つ選んでください。商品名・URL・どのサイトで発見したかを書いてください。</div>
+                <div class="q-hint">自分で市場を嗅ぎ取れるか・発見力があるか</div>
+              </div>
+            </div>
+            <div class="q-item">
+              <span class="q-num">Q 02</span>
+              <div class="q-body">
+                <div class="q-text">その商品のマーケティング分析をしてください。TAM・SAM・SOM（概算でOK）・市場成長率・主要競合の強み弱み・日本市場への参入障壁を整理してください。</div>
+                <div class="q-hint">市場を数字と構造で捉えられるか</div>
+              </div>
+            </div>
+            <div class="q-item">
+              <span class="q-num">Q 03</span>
+              <div class="q-body">
+                <div class="q-text">「なぜこの商品を日本で売るのか」「競合に対してどんな優位性（USP）があるのか」を具体的に説明してください。</div>
+                <div class="q-hint">参入理由と競合優位性が明確に言えるか</div>
+              </div>
+            </div>
+            <div class="q-item">
+              <span class="q-num">Q 04</span>
+              <div class="q-body">
+                <div class="q-text">この商品の「最も購買確度が高い1人（N1）」を具体的に描いてください。年齢・性別・職業・生活スタイル・悩み・なぜこの商品を買うのかまで。</div>
+                <div class="q-hint">ターゲットを1人の人間として解像度高く描けるか</div>
+              </div>
+            </div>
+            <div class="q-item">
+              <span class="q-num">Q 05</span>
+              <div class="q-body">
+                <div class="q-text">このN1に届けるために「どの媒体で・どのように売るか」を具体的に書いてください。媒体の選定理由・訴求のポイント・コンテンツの方向性まで含めてください。</div>
+                <div class="q-hint">N1 → 媒体 → 訴求が一本の線でつながっているか</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEST 2 -->
+    <div class="test-card reveal">
+      <div class="test-header">
+        <span class="test-badge" style="background:var(--col2-bg);color:var(--col2);">Test ②</span>
+        <div class="test-header-text">
+          <div class="test-header-title">Instagram ダイレクト広告動画の制作</div>
+          <div class="test-header-sub">台本構成力・マーケティング視点の撮影表現力を測る</div>
+        </div>
+      </div>
+      <div class="test-content">
+        <div class="test-side">
+          <div class="tag-row">
+            <span class="tag">自分の購入商品</span>
+            <span class="tag">体験系動画</span>
+            <span class="tag">20〜30秒</span>
+            <span class="tag">ダイレクト広告</span>
+          </div>
+
+          <div class="side-box box-cond">
+            <div class="side-box-label">制作条件</div>
+            <div class="side-item">配信先：Instagram 動画広告（縦型・リール想定）</div>
+            <div class="side-item">尺：20秒〜30秒以内</div>
+            <div class="side-item">種類：体験系（使用シーン・使用前後など）</div>
+            <div class="side-item">目的：見たユーザーがそのまま購入するダイレクト広告</div>
+            <div class="side-item">素材：自分が最近買った商品を使用</div>
+          </div>
+
+          <div class="side-box box-ai">
+            <div class="side-box-label">AI 活用OK</div>
+            <div class="side-item">テロップ生成・BGM選定など積極活用</div>
+            <div class="side-item">AI動画ツールも自由に使用可</div>
+          </div>
+        </div>
+
+        <div class="test-main">
+
+          <div class="eval-notice">
+            <div class="eval-notice-title">評価のポイント — このテストで見ること・見ないこと</div>
+            <div class="eval-notice-body">
+              このテストでは<strong>編集スキルは一切評価しません。</strong><br>
+              凝ったエフェクトやカット編集の巧さは不要です。<br>
+              見ているのは以下の2点だけです。
+            </div>
+            <div class="eval-focus">
+              <div class="eval-focus-item">
+                <div class="eval-focus-label">台本構成力</div>
+                <div class="eval-focus-text">冒頭・中盤・ラストの流れが購買につながる設計になっているか</div>
+              </div>
+              <div class="eval-focus-item">
+                <div class="eval-focus-label">マーケ視点の撮影</div>
+                <div class="eval-focus-text">ターゲットと訴求を意識した映像の見せ方ができているか</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="q-list">
+            <div class="q-item">
+              <span class="q-num">Q 06</span>
+              <div class="q-body">
+                <div class="q-text">使用する商品と「その商品のターゲット・一番の購買ポイント」を簡単に書いてください。</div>
+                <div class="q-hint">マーケティング視点で商品を捉えた上で制作しているか確認</div>
+              </div>
+            </div>
+            <div class="q-item">
+              <span class="q-num">Q 07</span>
+              <div class="q-body">
+                <div class="q-text">条件をもとに動画を制作し、以下をすべて提出してください。<br>
+                  ① 完成動画（ファイルまたはリンク）<br>
+                  ② 台本リンク（Googleドキュメント等）<br>
+                  ③ 使用素材まとめリンク（Googleドライブ等）
+                </div>
+                <div class="q-hint">撮影力・台本に沿った映像表現ができているか</div>
+              </div>
+            </div>
+            <div class="q-item">
+              <span class="q-num">Q 08</span>
+              <div class="q-body">
+                <div class="q-text">「冒頭で何を見せてどう引きつけるか」「購買を促すためにどんな工夫をしたか」を1〜2行ずつ書いてください。</div>
+                <div class="q-hint">広告としての意図を言語化できるか・自分の判断を説明できるか</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EVAL -->
+<div class="eval-section" id="eval">
+  <div class="section-label">Evaluation</div>
+  <h2 class="section-title">採点の視点</h2>
+  <p class="section-lead reveal">知識量やAIの使い方ではなく、アウトプットの質と思考の筋道を見ます。</p>
+  <div class="eval-cards reveal">
+    <div class="eval-card">
+      <div class="eval-num">01</div>
+      <div class="eval-name">リサーチ力</div>
+      <div class="eval-desc">自分で市場を嗅ぎ取り、商品を戦略的に選べるか。</div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-num">02</div>
+      <div class="eval-name">N1の解像度</div>
+      <div class="eval-desc">ターゲットを1人の人間として具体的に描けるか。</div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-num">03</div>
+      <div class="eval-name">戦略の一貫性</div>
+      <div class="eval-desc">N1 → 媒体 → 訴求が論理的につながっているか。</div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-num">04</div>
+      <div class="eval-name">台本・撮影力</div>
+      <div class="eval-desc">購買につながる構成と映像表現ができているか。編集は評価しない。</div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-num">05</div>
+      <div class="eval-name">意図の言語化</div>
+      <div class="eval-desc">なぜそう作ったか、自分の判断を言葉で説明できるか。</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta" id="apply">
+  <div class="cta-label">Apply</div>
+  <h2 class="cta-title">準備ができたら、フォームから提出してください。</h2>
+  <p class="cta-sub">締め切りまでにGoogleスプレッドシートへ回答を入力・送信してください。提出後の修正は受け付けられませんので、見直しを行ってから送信してください。</p>
+  <a href="https://docs.google.com/spreadsheets/d/1mwEAk4mtJpl9ReIJAz4Wa1GLzAyVSNuifDDbcjFh-iM/edit?usp=sharing" class="cta-btn">Googleスプレッドシートへ進む &nbsp;→</a>
+</div>
+
+<footer>
+  <div class="footer-l">実務選考テスト 2026 — Overseas General Agency Team</div>
+  <div class="footer-r">© 2025 All rights reserved.</div>
+</footer>
+
+<script>
+const els = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach((e,i) => {
+    if(e.isIntersecting){
+      setTimeout(()=>e.target.classList.add('visible'), i*60);
+      obs.unobserve(e.target);
+    }
+  });
+},{threshold:0.07});
+els.forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
