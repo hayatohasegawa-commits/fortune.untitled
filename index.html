@@ -637,7 +637,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-emailjs.init('rii6flcTjYmWDURNE');
+const EMAILJS_KEY = 'rii6fIcTjYmWDURNE';
 
 // ★★★ 許可するメールアドレスをここに追加 ★★★
 const ALLOWED_EMAILS = [
@@ -692,10 +692,11 @@ $('request-form').addEventListener('submit', async (e) => {
   }
 
   try {
-    await emailjs.send('service_jcr6azh', 'template_kho9xpm', { from_email: email });
+    await emailjs.send('service_jcr6azh', 'template_l3z9uue', { from_email: email }, EMAILJS_KEY);
     hideAllScreens();
     requestDoneScreen.style.display = 'flex';
-  } catch {
+  } catch (err) {
+    console.error('EmailJS error:', JSON.stringify(err));
     error.textContent = '送信に失敗しました。しばらく待ってから再度お試しください。';
   } finally {
     submitBtn.disabled = false;
