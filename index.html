@@ -784,6 +784,10 @@ $('verify-logout').addEventListener('click', () => { signOut(auth); });
 logoutBtn.addEventListener('click', () => { signOut(auth); });
 
 onAuthStateChanged(auth, (user) => {
+  if (user && !ALLOWED_EMAILS.includes(user.email.toLowerCase())) {
+    signOut(auth);
+    return;
+  }
   if (user && user.emailVerified) {
     authOverlay.style.display = 'none';
     mainContent.style.display = 'block';
