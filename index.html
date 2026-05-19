@@ -177,6 +177,18 @@ footer{background:var(--ink);padding:2rem 5rem;display:flex;align-items:center;j
 #auth-submit:disabled{opacity:0.5;cursor:not-allowed;}
 #auth-error{font-size:12.5px;color:var(--accent);min-height:1.2em;text-align:center;}
 .auth-note{font-size:12px;color:var(--ink-light);margin-top:1.5rem;text-align:center;line-height:1.7;}
+.auth-note-link{font-size:13px;color:var(--ink-mid);margin-top:1.5rem;cursor:pointer;text-align:center;}
+.auth-note-link span{color:var(--accent);font-weight:500;}
+.auth-note-link:hover span{text-decoration:underline;}
+#request-form{width:100%;display:flex;flex-direction:column;gap:1rem;}
+#request-form input{width:100%;padding:0.85rem 1rem;border:1.5px solid var(--ink-faint);border-radius:6px;font-family:var(--font-sans);font-size:14px;background:var(--paper-white);color:var(--ink);outline:none;transition:border-color 0.2s;}
+#request-form input:focus{border-color:var(--accent);}
+#request-form input::placeholder{color:var(--ink-light);}
+#request-submit{width:100%;padding:0.9rem;background:var(--accent);color:#fff;border:none;border-radius:4px;font-family:var(--font-mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+#request-submit:hover{background:var(--ink);}
+#request-submit:disabled{opacity:0.5;cursor:not-allowed;}
+#request-error{font-size:12.5px;color:var(--accent);min-height:1.2em;text-align:center;}
+#request-screen,#request-done-screen{display:flex;flex-direction:column;align-items:center;width:100%;max-width:400px;padding:0 1.5rem;}
 .verify-icon{font-size:48px;margin-bottom:1rem;}
 .verify-title{font-family:var(--font-serif);font-size:1.4rem;font-weight:300;color:var(--ink);margin-bottom:0.5rem;}
 .verify-desc{font-size:13px;color:var(--ink-mid);text-align:center;line-height:1.9;margin-bottom:1.5rem;}
@@ -216,19 +228,41 @@ footer{background:var(--ink);padding:2rem 5rem;display:flex;align-items:center;j
 
 <!-- AUTH OVERLAY -->
 <div id="auth-overlay">
-  <div id="login-screen">
-    <div class="auth-logo">実務選考テスト 2026</div>
-    <h2 id="auth-title">ログイン</h2>
-    <p class="auth-desc">招待されたメールアドレスでログインしてください。</p>
+  <!-- 未登録者向け: リクエスト画面 -->
+  <div id="request-screen">
+    <div class="auth-logo">株式会社 UNTITLED</div>
+    <h2 id="auth-title">実務選考テスト</h2>
+    <p class="auth-desc">閲覧にはアクセス申請が必要です。<br>メールアドレスを入力して申請してください。</p>
+    <form id="request-form">
+      <input type="email" id="request-email" placeholder="メールアドレス" required>
+      <div id="request-error"></div>
+      <button type="submit" id="request-submit">アクセスを申請する</button>
+    </form>
+    <div id="request-toggle" class="auth-note-link">承認済みの方は<span>ログイン</span></div>
+  </div>
+  <!-- リクエスト送信完了 -->
+  <div id="request-done-screen" style="display:none;">
+    <div class="verify-icon">✉️</div>
+    <h2 class="verify-title">申請を送信しました</h2>
+    <p class="verify-desc">担当者が確認次第、アクセスが許可されます。<br>しばらくお待ちください。</p>
+    <button id="request-done-back" class="verify-btn link">戻る</button>
+  </div>
+  <!-- 承認済みユーザー: ログイン画面 -->
+  <div id="login-screen" style="display:none;">
+    <div class="auth-logo">株式会社 UNTITLED</div>
+    <h2 id="login-title">ログイン</h2>
+    <p class="auth-desc">承認済みのメールアドレスでログインしてください。</p>
     <form id="auth-form">
       <input type="email" id="auth-email" placeholder="メールアドレス" required>
       <input type="password" id="auth-pass" placeholder="パスワード（6文字以上）" required minlength="6">
       <div id="auth-error"></div>
       <button type="submit" id="auth-submit">ログイン</button>
     </form>
-    <p class="auth-note">初回はアカウントが自動作成され、確認メールが届きます。</p>
+    <p class="auth-note">初回ログイン時にアカウントが自動作成されます。</p>
+    <div id="login-toggle" class="auth-note-link">アクセス申請は<span>こちら</span></div>
   </div>
-  <div id="verify-screen">
+  <!-- メール認証待ち -->
+  <div id="verify-screen" style="display:none;">
     <div class="verify-icon">✉️</div>
     <h2 class="verify-title">メール認証を完了してください</h2>
     <p class="verify-desc"><span id="verify-email"></span> に確認メールを送信しました。<br>メール内のリンクをクリックして認証を完了してください。</p>
@@ -587,6 +621,7 @@ const obs = new IntersectionObserver((entries) => {
 els.forEach(el=>obs.observe(el));
 </script>
 </div><!-- /main-content -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
@@ -602,6 +637,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+emailjs.init('rii6flcTjYmWDURNE');
 
 // ★★★ 許可するメールアドレスをここに追加 ★★★
 const ALLOWED_EMAILS = [
@@ -613,39 +649,82 @@ const ALLOWED_EMAILS = [
 const $ = id => document.getElementById(id);
 const authOverlay = $('auth-overlay');
 const mainContent = $('main-content');
-const authForm = $('auth-form');
-const authSubmit = $('auth-submit');
-const authError = $('auth-error');
-const authEmail = $('auth-email');
-const authPass = $('auth-pass');
-const verifyScreen = $('verify-screen');
+const requestScreen = $('request-screen');
+const requestDoneScreen = $('request-done-screen');
 const loginScreen = $('login-screen');
-const resendBtn = $('resend-btn');
-const resendMsg = $('resend-msg');
+const verifyScreen = $('verify-screen');
 const logoutBtn = $('logout-btn');
 
-authForm.addEventListener('submit', async (e) => {
+function hideAllScreens() {
+  requestScreen.style.display = 'none';
+  requestDoneScreen.style.display = 'none';
+  loginScreen.style.display = 'none';
+  verifyScreen.style.display = 'none';
+}
+
+// 画面切り替え
+$('request-toggle').addEventListener('click', () => {
+  hideAllScreens();
+  loginScreen.style.display = 'flex';
+});
+$('login-toggle').addEventListener('click', () => {
+  hideAllScreens();
+  requestScreen.style.display = 'flex';
+});
+$('request-done-back').addEventListener('click', () => {
+  hideAllScreens();
+  requestScreen.style.display = 'flex';
+});
+
+// アクセス申請
+$('request-form').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const email = $('request-email').value.trim().toLowerCase();
+  const submitBtn = $('request-submit');
+  const error = $('request-error');
+  error.textContent = '';
+  submitBtn.disabled = true;
+
+  if (ALLOWED_EMAILS.includes(email)) {
+    error.textContent = 'このメールアドレスは既に承認済みです。ログインしてください。';
+    submitBtn.disabled = false;
+    return;
+  }
+
+  try {
+    await emailjs.send('service_jcr6azh', 'template_kho9xpm', { from_email: email });
+    hideAllScreens();
+    requestDoneScreen.style.display = 'flex';
+  } catch {
+    error.textContent = '送信に失敗しました。しばらく待ってから再度お試しください。';
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+
+// ログイン
+$('auth-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const authError = $('auth-error');
+  const authSubmit = $('auth-submit');
   authError.textContent = '';
   authSubmit.disabled = true;
-  const email = authEmail.value.trim().toLowerCase();
-  const pass = authPass.value;
+  const email = $('auth-email').value.trim().toLowerCase();
+  const pass = $('auth-pass').value;
 
   if (!ALLOWED_EMAILS.includes(email)) {
-    authError.textContent = 'このメールアドレスは招待されていません';
+    authError.textContent = 'このメールアドレスは承認されていません';
     authSubmit.disabled = false;
     return;
   }
 
   try {
-    // まずログインを試行
     const cred = await signInWithEmailAndPassword(auth, email, pass);
     if (!cred.user.emailVerified) {
       showVerifyScreen(cred.user);
     }
   } catch (err) {
     if (err.code === 'auth/invalid-credential') {
-      // アカウントが存在しない場合は自動作成
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, pass);
         await sendEmailVerification(cred.user);
@@ -670,12 +749,14 @@ authForm.addEventListener('submit', async (e) => {
 });
 
 function showVerifyScreen(user) {
-  loginScreen.style.display = 'none';
+  hideAllScreens();
   verifyScreen.style.display = 'flex';
   $('verify-email').textContent = user.email;
 }
 
-resendBtn.addEventListener('click', async () => {
+$('resend-btn').addEventListener('click', async () => {
+  const resendBtn = $('resend-btn');
+  const resendMsg = $('resend-msg');
   resendBtn.disabled = true;
   try {
     await sendEmailVerification(auth.currentUser);
@@ -694,18 +775,13 @@ $('verify-check').addEventListener('click', async () => {
     authOverlay.style.display = 'none';
     mainContent.style.display = 'block';
   } else {
-    resendMsg.textContent = 'まだ認証が完了していません。メール内のリンクをクリックしてください。';
-    resendMsg.style.color = '#c84b2f';
+    $('resend-msg').textContent = 'まだ認証が完了していません。メール内のリンクをクリックしてください。';
+    $('resend-msg').style.color = '#c84b2f';
   }
 });
 
-$('verify-logout').addEventListener('click', () => {
-  signOut(auth);
-});
-
-logoutBtn.addEventListener('click', () => {
-  signOut(auth);
-});
+$('verify-logout').addEventListener('click', () => { signOut(auth); });
+logoutBtn.addEventListener('click', () => { signOut(auth); });
 
 onAuthStateChanged(auth, (user) => {
   if (user && user.emailVerified) {
@@ -721,8 +797,8 @@ onAuthStateChanged(auth, (user) => {
     authOverlay.style.display = 'flex';
     mainContent.style.display = 'none';
     logoutBtn.style.display = 'none';
-    loginScreen.style.display = 'flex';
-    verifyScreen.style.display = 'none';
+    hideAllScreens();
+    requestScreen.style.display = 'flex';
   }
 });
 </script>
