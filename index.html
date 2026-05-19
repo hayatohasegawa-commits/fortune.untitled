@@ -176,9 +176,7 @@ footer{background:var(--ink);padding:2rem 5rem;display:flex;align-items:center;j
 #auth-submit:hover{background:var(--accent);}
 #auth-submit:disabled{opacity:0.5;cursor:not-allowed;}
 #auth-error{font-size:12.5px;color:var(--accent);min-height:1.2em;text-align:center;}
-#auth-toggle{font-size:13px;color:var(--ink-mid);margin-top:1.5rem;cursor:pointer;text-align:center;}
-#auth-toggle span{color:var(--accent);font-weight:500;}
-#auth-toggle:hover span{text-decoration:underline;}
+.auth-note{font-size:12px;color:var(--ink-light);margin-top:1.5rem;text-align:center;line-height:1.7;}
 .verify-icon{font-size:48px;margin-bottom:1rem;}
 .verify-title{font-family:var(--font-serif);font-size:1.4rem;font-weight:300;color:var(--ink);margin-bottom:0.5rem;}
 .verify-desc{font-size:13px;color:var(--ink-mid);text-align:center;line-height:1.9;margin-bottom:1.5rem;}
@@ -221,14 +219,14 @@ footer{background:var(--ink);padding:2rem 5rem;display:flex;align-items:center;j
   <div id="login-screen">
     <div class="auth-logo">実務選考テスト 2026</div>
     <h2 id="auth-title">ログイン</h2>
-    <p class="auth-desc">メールアドレス認証済みの方のみ閲覧できます。</p>
+    <p class="auth-desc">招待されたメールアドレスでログインしてください。</p>
     <form id="auth-form">
       <input type="email" id="auth-email" placeholder="メールアドレス" required>
       <input type="password" id="auth-pass" placeholder="パスワード（6文字以上）" required minlength="6">
       <div id="auth-error"></div>
       <button type="submit" id="auth-submit">ログイン</button>
     </form>
-    <div id="auth-toggle">アカウントがない方は<span>新規登録</span></div>
+    <p class="auth-note">初回はアカウントが自動作成され、確認メールが届きます。</p>
   </div>
   <div id="verify-screen">
     <div class="verify-icon">✉️</div>
@@ -605,13 +603,18 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// ★★★ 許可するメールアドレスをここに追加 ★★★
+const ALLOWED_EMAILS = [
+  'hayato.hasegawa@un-titled.co.jp',
+  // 候補者のメールアドレスを以下に追加:
+  // 'example@gmail.com',
+];
+
 const $ = id => document.getElementById(id);
 const authOverlay = $('auth-overlay');
 const mainContent = $('main-content');
 const authForm = $('auth-form');
-const authTitle = $('auth-title');
 const authSubmit = $('auth-submit');
-const authToggle = $('auth-toggle');
 const authError = $('auth-error');
 const authEmail = $('auth-email');
 const authPass = $('auth-pass');
@@ -621,44 +624,46 @@ const resendBtn = $('resend-btn');
 const resendMsg = $('resend-msg');
 const logoutBtn = $('logout-btn');
 
-let isLogin = true;
-
-authToggle.addEventListener('click', () => {
-  isLogin = !isLogin;
-  authTitle.textContent = isLogin ? 'ログイン' : '新規登録';
-  authSubmit.textContent = isLogin ? 'ログイン' : '登録する';
-  authToggle.innerHTML = isLogin
-    ? 'アカウントがない方は<span>新規登録</span>'
-    : 'すでにアカウントがある方は<span>ログイン</span>';
-  authError.textContent = '';
-});
-
 authForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   authError.textContent = '';
   authSubmit.disabled = true;
-  const email = authEmail.value.trim();
+  const email = authEmail.value.trim().toLowerCase();
   const pass = authPass.value;
+
+  if (!ALLOWED_EMAILS.includes(email)) {
+    authError.textContent = 'このメールアドレスは招待されていません';
+    authSubmit.disabled = false;
+    return;
+  }
+
   try {
-    if (isLogin) {
-      const cred = await signInWithEmailAndPassword(auth, email, pass);
-      if (!cred.user.emailVerified) {
-        showVerifyScreen(cred.user);
-      }
-    } else {
-      const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      await sendEmailVerification(cred.user);
+    // まずログインを試行
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    if (!cred.user.emailVerified) {
       showVerifyScreen(cred.user);
     }
   } catch (err) {
-    const msgs = {
-      'auth/email-already-in-use': 'このメールアドレスは既に登録されています',
-      'auth/invalid-email': '有効なメールアドレスを入力してください',
-      'auth/weak-password': 'パスワードは6文字以上で入力してください',
-      'auth/invalid-credential': 'メールアドレスまたはパスワードが正しくありません',
-      'auth/too-many-requests': 'ログイン試行回数が多すぎます。しばらく待ってから再度お試しください',
-    };
-    authError.textContent = msgs[err.code] || 'エラーが発生しました: ' + err.message;
+    if (err.code === 'auth/invalid-credential') {
+      // アカウントが存在しない場合は自動作成
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, pass);
+        await sendEmailVerification(cred.user);
+        showVerifyScreen(cred.user);
+      } catch (regErr) {
+        if (regErr.code === 'auth/email-already-in-use') {
+          authError.textContent = 'パスワードが正しくありません';
+        } else if (regErr.code === 'auth/weak-password') {
+          authError.textContent = 'パスワードは6文字以上で入力してください';
+        } else {
+          authError.textContent = 'エラーが発生しました: ' + regErr.message;
+        }
+      }
+    } else if (err.code === 'auth/too-many-requests') {
+      authError.textContent = 'ログイン試行回数が多すぎます。しばらく待ってください';
+    } else {
+      authError.textContent = 'エラーが発生しました: ' + err.message;
+    }
   } finally {
     authSubmit.disabled = false;
   }
