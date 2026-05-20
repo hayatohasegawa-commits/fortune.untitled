@@ -251,27 +251,13 @@ footer{background:var(--ink);padding:2rem 5rem;display:flex;align-items:center;j
   <div id="login-screen" style="display:none;">
     <div class="auth-logo">株式会社 UNTITLED</div>
     <h2 id="login-title">ログイン</h2>
-    <p class="auth-desc">承認済みのメールアドレスでログインしてください。</p>
+    <p class="auth-desc">承認済みのメールアドレスを入力してください。</p>
     <form id="auth-form">
       <input type="email" id="auth-email" placeholder="メールアドレス" required>
-      <input type="password" id="auth-pass" placeholder="パスワード（6文字以上）" required minlength="6">
       <div id="auth-error"></div>
       <button type="submit" id="auth-submit">ログイン</button>
     </form>
-    <p class="auth-note">初回ログイン時にアカウントが自動作成されます。</p>
     <div id="login-toggle" class="auth-note-link">アクセス申請は<span>こちら</span></div>
-  </div>
-  <!-- メール認証待ち -->
-  <div id="verify-screen" style="display:none;">
-    <div class="verify-icon">✉️</div>
-    <h2 class="verify-title">メール認証を完了してください</h2>
-    <p class="verify-desc"><span id="verify-email"></span> に確認メールを送信しました。<br>メール内のリンクをクリックして認証を完了してください。</p>
-    <div class="verify-actions">
-      <button id="verify-check" class="verify-btn primary">認証を確認する</button>
-      <button id="resend-btn" class="verify-btn secondary">確認メールを再送する</button>
-      <div id="resend-msg"></div>
-      <button id="verify-logout" class="verify-btn link">別のアカウントでログイン</button>
-    </div>
   </div>
 </div>
 
@@ -622,24 +608,9 @@ els.forEach(el=>obs.observe(el));
 </script>
 </div><!-- /main-content -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB-DpXjDzrSQaVOw3lGaAQhgUzEmDX1h5I",
-  authDomain: "untitled-recruit-793af.firebaseapp.com",
-  projectId: "untitled-recruit-793af",
-  storageBucket: "untitled-recruit-793af.firebasestorage.app",
-  messagingSenderId: "839058212000",
-  appId: "1:839058212000:web:3e626aa7d7cdff351af5c5"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+<script>
 const EMAILJS_KEY = 'rii6fIcTjYmWDURNE';
 
-// ★★★ 許可するメールアドレスをここに追加 ★★★
 const ALLOWED_EMAILS = [
   'hayato.hasegawa@un-titled.co.jp',
   'masaya.shimamoto@un-titled.co.jp',
@@ -653,29 +624,41 @@ const mainContent = $('main-content');
 const requestScreen = $('request-screen');
 const requestDoneScreen = $('request-done-screen');
 const loginScreen = $('login-screen');
-const verifyScreen = $('verify-screen');
 const logoutBtn = $('logout-btn');
 
 function hideAllScreens() {
   requestScreen.style.display = 'none';
   requestDoneScreen.style.display = 'none';
   loginScreen.style.display = 'none';
-  verifyScreen.style.display = 'none';
+}
+
+function showContent() {
+  authOverlay.style.display = 'none';
+  mainContent.style.display = 'block';
+  logoutBtn.style.display = 'flex';
+}
+
+function showAuth() {
+  authOverlay.style.display = 'flex';
+  mainContent.style.display = 'none';
+  logoutBtn.style.display = 'none';
+  hideAllScreens();
+  requestScreen.style.display = 'flex';
+}
+
+// 起動時: localStorageに保存済みならコンテンツ表示
+const saved = localStorage.getItem('auth_email');
+if (saved && ALLOWED_EMAILS.includes(saved)) {
+  showContent();
+} else {
+  localStorage.removeItem('auth_email');
+  showAuth();
 }
 
 // 画面切り替え
-$('request-toggle').addEventListener('click', () => {
-  hideAllScreens();
-  loginScreen.style.display = 'flex';
-});
-$('login-toggle').addEventListener('click', () => {
-  hideAllScreens();
-  requestScreen.style.display = 'flex';
-});
-$('request-done-back').addEventListener('click', () => {
-  hideAllScreens();
-  requestScreen.style.display = 'flex';
-});
+$('request-toggle').addEventListener('click', () => { hideAllScreens(); loginScreen.style.display = 'flex'; });
+$('login-toggle').addEventListener('click', () => { hideAllScreens(); requestScreen.style.display = 'flex'; });
+$('request-done-back').addEventListener('click', () => { hideAllScreens(); requestScreen.style.display = 'flex'; });
 
 // アクセス申請
 $('request-form').addEventListener('submit', async (e) => {
@@ -705,107 +688,24 @@ $('request-form').addEventListener('submit', async (e) => {
 });
 
 // ログイン
-$('auth-form').addEventListener('submit', async (e) => {
+$('auth-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const authError = $('auth-error');
-  const authSubmit = $('auth-submit');
-  authError.textContent = '';
-  authSubmit.disabled = true;
   const email = $('auth-email').value.trim().toLowerCase();
-  const pass = $('auth-pass').value;
 
   if (!ALLOWED_EMAILS.includes(email)) {
     authError.textContent = 'このメールアドレスは承認されていません';
-    authSubmit.disabled = false;
     return;
   }
 
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, pass);
-    if (!cred.user.emailVerified) {
-      showVerifyScreen(cred.user);
-    }
-  } catch (err) {
-    if (err.code === 'auth/invalid-credential') {
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, pass);
-        await sendEmailVerification(cred.user);
-        showVerifyScreen(cred.user);
-      } catch (regErr) {
-        if (regErr.code === 'auth/email-already-in-use') {
-          authError.textContent = 'パスワードが正しくありません';
-        } else if (regErr.code === 'auth/weak-password') {
-          authError.textContent = 'パスワードは6文字以上で入力してください';
-        } else {
-          authError.textContent = 'エラーが発生しました: ' + regErr.message;
-        }
-      }
-    } else if (err.code === 'auth/too-many-requests') {
-      authError.textContent = 'ログイン試行回数が多すぎます。しばらく待ってください';
-    } else {
-      authError.textContent = 'エラーが発生しました: ' + err.message;
-    }
-  } finally {
-    authSubmit.disabled = false;
-  }
+  localStorage.setItem('auth_email', email);
+  showContent();
 });
 
-function showVerifyScreen(user) {
-  hideAllScreens();
-  verifyScreen.style.display = 'flex';
-  $('verify-email').textContent = user.email;
-}
-
-$('resend-btn').addEventListener('click', async () => {
-  const resendBtn = $('resend-btn');
-  const resendMsg = $('resend-msg');
-  resendBtn.disabled = true;
-  try {
-    await sendEmailVerification(auth.currentUser);
-    resendMsg.textContent = '確認メールを再送しました';
-    resendMsg.style.color = '#1a6650';
-  } catch {
-    resendMsg.textContent = 'しばらく待ってから再度お試しください';
-    resendMsg.style.color = '#c84b2f';
-  }
-  setTimeout(() => { resendBtn.disabled = false; resendMsg.textContent = ''; }, 30000);
-});
-
-$('verify-check').addEventListener('click', async () => {
-  await auth.currentUser.reload();
-  if (auth.currentUser.emailVerified) {
-    authOverlay.style.display = 'none';
-    mainContent.style.display = 'block';
-  } else {
-    $('resend-msg').textContent = 'まだ認証が完了していません。メール内のリンクをクリックしてください。';
-    $('resend-msg').style.color = '#c84b2f';
-  }
-});
-
-$('verify-logout').addEventListener('click', () => { signOut(auth); });
-logoutBtn.addEventListener('click', () => { signOut(auth); });
-
-onAuthStateChanged(auth, (user) => {
-  if (user && !ALLOWED_EMAILS.includes(user.email.toLowerCase())) {
-    signOut(auth);
-    return;
-  }
-  if (user && user.emailVerified) {
-    authOverlay.style.display = 'none';
-    mainContent.style.display = 'block';
-    logoutBtn.style.display = 'flex';
-  } else if (user && !user.emailVerified) {
-    authOverlay.style.display = 'flex';
-    mainContent.style.display = 'none';
-    logoutBtn.style.display = 'none';
-    showVerifyScreen(user);
-  } else {
-    authOverlay.style.display = 'flex';
-    mainContent.style.display = 'none';
-    logoutBtn.style.display = 'none';
-    hideAllScreens();
-    requestScreen.style.display = 'flex';
-  }
+// ログアウト
+logoutBtn.addEventListener('click', () => {
+  localStorage.removeItem('auth_email');
+  showAuth();
 });
 </script>
 </body>
