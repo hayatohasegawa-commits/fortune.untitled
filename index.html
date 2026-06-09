@@ -586,7 +586,7 @@ footer{background:var(--ink);padding:2rem 5rem;display:flex;align-items:center;j
   <div class="cta-label">Apply</div>
   <h2 class="cta-title">準備ができたら、フォームから提出してください。</h2>
   <p class="cta-sub">締め切りまでにGoogleスプレッドシートへ回答を入力・送信してください。提出後の修正は受け付けられませんので、見直しを行ってから送信してください。</p>
-  <a href="https://docs.google.com/spreadsheets/d/1mwEAk4mtJpl9ReIJAz4Wa1GLzAyVSNuifDDbcjFh-iM/edit?usp=sharing" class="cta-btn">Googleスプレッドシートへ進む &nbsp;→</a>
+  <a id="cta-sheet-link" href="https://docs.google.com/spreadsheets/d/1mwEAk4mtJpl9ReIJAz4Wa1GLzAyVSNuifDDbcjFh-iM/edit?usp=sharing" class="cta-btn">Googleスプレッドシートへ進む &nbsp;→</a>
 </div>
 
 <footer>
@@ -611,14 +611,17 @@ els.forEach(el=>obs.observe(el));
 <script>
 const EMAILJS_KEY = 'rii6fIcTjYmWDURNE';
 
-const ALLOWED_EMAILS = [
-  'hayato.hasegawa@un-titled.co.jp',
-  'masaya.shimamoto@un-titled.co.jp',
-  'machida.ena@gmail.com',
-  'ota.akisumi@gmail.com',
-  'recruitment@keys-inccojp.com',
-  '25bm069p@rikkyo.ac.jp',
-];
+// ★★★ 候補者を追加する時はここにメール・名前・スプレッドシートIDを追加 ★★★
+// sheetId: Googleスプレッドシートの /d/XXXXX/ の部分
+const CANDIDATES = {
+  'hayato.hasegawa@un-titled.co.jp': { name: '長谷川 隼', sheetId: '1mwEAk4mtJpl9ReIJAz4Wa1GLzAyVSNuifDDbcjFh-iM' },
+  'masaya.shimamoto@un-titled.co.jp': { name: '島本 雅也', sheetId: '' },
+  'machida.ena@gmail.com': { name: '町田 えな', sheetId: '' },
+  'ota.akisumi@gmail.com': { name: '太田 あきすみ', sheetId: '' },
+  'recruitment@keys-inccojp.com': { name: 'Keys Inc.', sheetId: '' },
+  '25bm069p@rikkyo.ac.jp': { name: '', sheetId: '' },
+};
+const ALLOWED_EMAILS = Object.keys(CANDIDATES);
 
 const $ = id => document.getElementById(id);
 const authOverlay = $('auth-overlay');
@@ -634,10 +637,16 @@ function hideAllScreens() {
   loginScreen.style.display = 'none';
 }
 
-function showContent() {
+function showContent(email) {
   authOverlay.style.display = 'none';
   mainContent.style.display = 'block';
   logoutBtn.style.display = 'flex';
+  // 候補者専用スプレッドシートにリンクを差し替え
+  const c = CANDIDATES[email];
+  if (c && c.sheetId) {
+    const ctaLink = $('cta-sheet-link');
+    if (ctaLink) ctaLink.href = 'https://docs.google.com/spreadsheets/d/' + c.sheetId + '/edit?usp=sharing';
+  }
 }
 
 function showAuth() {
@@ -651,7 +660,7 @@ function showAuth() {
 // 起動時: localStorageに保存済みならコンテンツ表示
 const saved = localStorage.getItem('auth_email');
 if (saved && ALLOWED_EMAILS.includes(saved)) {
-  showContent();
+  showContent(saved);
 } else {
   localStorage.removeItem('auth_email');
   showAuth();
@@ -701,7 +710,7 @@ $('auth-form').addEventListener('submit', (e) => {
   }
 
   localStorage.setItem('auth_email', email);
-  showContent();
+  showContent(email);
 });
 
 // ログアウト
