@@ -611,18 +611,24 @@ els.forEach(el=>obs.observe(el));
 <script>
 const EMAILJS_KEY = 'rii6fIcTjYmWDURNE';
 
-// ★★★ 候補者を追加する時はここにメール・名前・スプレッドシートIDを追加 ★★★
+// ★★★ 候補者を追加する時はここに key・メール・名前・スプレッドシートIDを追加 ★★★
+// key: URLパラメータ (?c=xxx) に使う識別子
 // sheetId: Googleスプレッドシートの /d/XXXXX/ の部分
-const CANDIDATES = {
-  'hayato.hasegawa@un-titled.co.jp': { name: '長谷川 隼', sheetId: '1awqBZVQzOcdb0lsW-WSpa2oqCBUUe3VR3Edd18vZMu0' },
-  'masaya.shimamoto@un-titled.co.jp': { name: '島本 雅也', sheetId: '' },
-  'machida.ena@gmail.com': { name: '町田 えな', sheetId: '' },
-  'ota.akisumi@gmail.com': { name: '太田 あきすみ', sheetId: '' },
-  'recruitment@keys-inccojp.com': { name: 'Keys Inc.', sheetId: '' },
-  '25bm069p@rikkyo.ac.jp': { name: '', sheetId: '' },
-  'romio061228@gmail.com': { name: '栁澤狼士', sheetId: '1awqBZVQzOcdb0lsW-WSpa2oqCBUUe3VR3Edd18vZMu0' },
-};
-const ALLOWED_EMAILS = Object.keys(CANDIDATES);
+const CANDIDATES = [
+  { key: 'hasegawa', email: 'hayato.hasegawa@un-titled.co.jp', name: '長谷川 隼', sheetId: '1awqBZVQzOcdb0lsW-WSpa2oqCBUUe3VR3Edd18vZMu0' },
+  { key: 'shimamoto', email: 'masaya.shimamoto@un-titled.co.jp', name: '島本 雅也', sheetId: '' },
+  { key: 'machida', email: 'machida.ena@gmail.com', name: '町田 えな', sheetId: '' },
+  { key: 'ota', email: 'ota.akisumi@gmail.com', name: '太田 あきすみ', sheetId: '' },
+  { key: 'keys', email: 'recruitment@keys-inccojp.com', name: 'Keys Inc.', sheetId: '' },
+  { key: 'rikkyo', email: '25bm069p@rikkyo.ac.jp', name: '', sheetId: '' },
+  { key: 'yanagisawa', email: 'romio061228@gmail.com', name: '栁澤狼士', sheetId: '1awqBZVQzOcdb0lsW-WSpa2oqCBUUe3VR3Edd18vZMu0' },
+];
+const ALLOWED_EMAILS = CANDIDATES.map(c => c.email);
+
+// URLパラメータから候補者を特定
+const urlParams = new URLSearchParams(window.location.search);
+const candidateKey = urlParams.get('c');
+const currentCandidate = candidateKey ? CANDIDATES.find(c => c.key === candidateKey) : null;
 
 const $ = id => document.getElementById(id);
 const authOverlay = $('auth-overlay');
@@ -638,12 +644,15 @@ function hideAllScreens() {
   loginScreen.style.display = 'none';
 }
 
+function findCandidate(email) {
+  return CANDIDATES.find(c => c.email === email);
+}
+
 function showContent(email) {
   authOverlay.style.display = 'none';
   mainContent.style.display = 'block';
   logoutBtn.style.display = 'flex';
-  // 候補者専用スプレッドシートにリンクを差し替え
-  const c = CANDIDATES[email];
+  const c = findCandidate(email);
   if (c && c.sheetId) {
     const ctaLink = $('cta-sheet-link');
     if (ctaLink) ctaLink.href = 'https://docs.google.com/spreadsheets/d/' + c.sheetId + '/edit?usp=sharing';
@@ -655,19 +664,30 @@ function showAuth() {
   mainContent.style.display = 'none';
   logoutBtn.style.display = 'none';
   hideAllScreens();
-  requestScreen.style.display = 'flex';
+  // ?c= パラメータがある場合はログイン画面を直接表示（申請画面をスキップ）
+  if (currentCandidate) {
+    loginScreen.style.display = 'flex';
+  } else {
+    requestScreen.style.display = 'flex';
+  }
 }
 
-// 起動時: localStorageに保存済みならコンテンツ表示
+// 起動時: localStorageに保存済みかつ、?c=パラメータと一致するならコンテンツ表示
 const saved = localStorage.getItem('auth_email');
 if (saved && ALLOWED_EMAILS.includes(saved)) {
-  showContent(saved);
+  // ?c= がある場合、そのURLに紐付いたメアドと一致するか確認
+  if (currentCandidate && currentCandidate.email !== saved) {
+    localStorage.removeItem('auth_email');
+    showAuth();
+  } else {
+    showContent(saved);
+  }
 } else {
   localStorage.removeItem('auth_email');
   showAuth();
 }
 
-// 画面切り替え
+// 画面切り替え（?c= がない時のみ申請画面を表示）
 $('request-toggle').addEventListener('click', () => { hideAllScreens(); loginScreen.style.display = 'flex'; });
 $('login-toggle').addEventListener('click', () => { hideAllScreens(); requestScreen.style.display = 'flex'; });
 $('request-done-back').addEventListener('click', () => { hideAllScreens(); requestScreen.style.display = 'flex'; });
@@ -705,7 +725,13 @@ $('auth-form').addEventListener('submit', (e) => {
   const authError = $('auth-error');
   const email = $('auth-email').value.trim().toLowerCase();
 
-  if (!ALLOWED_EMAILS.includes(email)) {
+  // ?c= パラメータがある場合、そのURLに紐付いたメアドのみ許可
+  if (currentCandidate) {
+    if (email !== currentCandidate.email) {
+      authError.textContent = 'このURLに対応するメールアドレスではありません';
+      return;
+    }
+  } else if (!ALLOWED_EMAILS.includes(email)) {
     authError.textContent = 'このメールアドレスは承認されていません';
     return;
   }
